@@ -1,0 +1,73 @@
+// sample.osn
+
+// This is a sample object serialization notation (OSN) file.
+// Similar to JSON, but with a different syntax:
+// - Use optional `@omd()` to reference an Object Model Definition (OMD) file, which can be local or remote.
+//     - `@omd()` must be placed at the beginning of the file, although it can be preceded by empty lines or comments.
+//     - The OMD file defines information such as object types, member types, default member values, and constraints.
+//     - The scope of an OMD file is limited to the current OSN file. (Since OSN file imports are not currently supported, this limitation has no practical effect at present).
+//     - The parser must handle security considerations for remote files.
+// - Use optional `@type()` to specify the type of the object, it will be used by the OSN parser to instantiate the object.
+//     - `@type()` must be placed at the beginning of an object's curly braces (`{}`), although it can be preceded by empty lines or comments.
+//     - When parsing an OSN file, `@type()` takes precedence over the type definition in the OMD.
+// - Use `@ref()` to reference objects in other OSN files, which can be local or remote.
+//     - Use `.` to access fields of a referenced object. The parser will report an error if the referenced object is null.
+//     - Use `?.` to access fields of a potentially null referenced object. The parser will not report an error if the referenced object is null.
+//     - The parser must handle circular references.
+//     - The parser must handle security considerations for remote references.
+// - Use `${ENV_VAR_NAME}` to reference environment variables, which will be resolved by the OSN parser.
+// - Use optional `@notnull` and `@nullable` to indicate whether a `@ref` or environment variable field is required or optional.
+//     - By default, reference fields are nullable.
+//     - The `@notnull` and `@nullable` annotations in an OSN file take precedence over those in the OMD.
+// - Use `key: value` pairs for properties.
+//     - Single-line string values should be enclosed in double quotes `"` .
+//     - Other types (integers, floats, booleans) are not quoted.
+//     - Double quotes for a key are optional, unless the key contains characters other than letters, numbers, and underscores.
+// - Special characters in single-line strings can be escaped with a backslash `\` , same as in JSON.
+// - Multi-line literal strings are enclosed in triple double quotes `"""` .
+//     - The opening `"""` can be followed by an `@eol()` tag to specify the end-of-line character (default is `\n` ). The string content should not start on this line.
+//     - All characters within a multi-line string are treated as literals, including comments (`//`). Backslashes are not treated as escape characters.
+//     - Each line must begin with a pipe character (`|`). Whitespace before the pipe is ignored. All content after the pipe (including subsequent whitespace and other pipe characters) is preserved. A line containing only a single pipe character is treated as an empty line.
+// - Use `[]` for arrays.
+// - Use `{}` for dictionaries (key-value pairs) and objects.
+//     - Keys must be unique within their scope (the enclosing curly braces).
+//     - A key of a dictionary must be a string, same as in JSON.
+// - Comments are allowed with `//` .
+// - Trailing commas are allowed.
+
+@omd(./sample.omd) // or @omd(https://example.com/sample.omd)
+
+{
+    NumberField: 42,
+    NumberFieldScientific: 3.14E-10,
+    NumberFieldBinary: 0b0010_1010, // Underscores are allowed for readability
+    NumberFieldOctal: 0o52,
+    NumberFieldHexadecimal: 0x2A,
+    BooleanField: true,
+    NullField: null,
+    SingleLineStringField: "Hello World!",
+    SingleLineStringFieldWithEscape: "Say:\n\"Hello!\"", // RFC 8259 compliant escaping
+    DateTimeStringField: "2025-06-24T12:00:00Z", // ISO 8601 format, just a string, no special handling for now
+    MultiLineStringField: """ @eol(\n) // or @eol(\r\n)
+                          |This is a multi-line string, can span multiple lines.
+                          |Any characters in this `"""` scope are treated as literal text, including comments, no escaping needed.
+                          |Lines must start with a pipe `|` character, which can be indented.
+                          |The following line is an empty line:
+                          |
+                          """,
+    ArrayField: [1, 2, 3, 4, 5],
+    DictionaryField: {
+        key: "Quotes are optional for keys",
+        "key with spaces and\nspecial characters @#$": "Quotes are required for keys with spaces or special characters",
+    },
+    ObjectField: {
+        @type(NAMESPACE.TYPE_NAME), // Specifies the concrete type of the object, which the OSN parser will use to instantiate it.
+        NestedNumber: 100,
+        NestedString: "Nested Hello",
+        NestedArray: [10, 20, 30],
+        // ...
+    },
+    ReferenceOtherObject: @nullable @ref(./other_sample.osn), // Reference to an object in another OSN file, the OSN parser will resolve this reference
+    ReferenceOtherObjectField: @ref(./other_sample.osn)?.FieldName, // Use dot notation to access a specific field of the referenced object
+    EnvironmentVariable: @notnull ${ENV_VAR_NAME}, // Reference to an environment variable, the OSN parser will resolve this reference
+}
