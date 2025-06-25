@@ -1,4 +1,6 @@
-# Object Serialization Notation
+# Introducing OSN
+
+[中文](./README_ZH.md) 
 
 TODO
 
