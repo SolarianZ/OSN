@@ -1,6 +1,6 @@
 # Introducing OSN
 
-[中文](./README_ZH.md) 
+[中文](./README_zh.md) 
 
 TODO
 
