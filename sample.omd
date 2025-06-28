@@ -1,1 +1,14 @@
-// TODO
+// sample.omd
+
+type MyNamespace.Sample {
+    IntegerValue : int32 in range[0, 100]
+    FloatValue: float32 in range[0.0, +)
+    NumberFieldScientific: float64 in range(-, 100]
+    BinaryValue: int64
+
+    ArrayOfIntegers: int32[] in set[1, 2, 3, 4, 5] unique
+
+    @type(MyNamespace.MyType)
+    @notnull
+    ObjectField: object 
+}
